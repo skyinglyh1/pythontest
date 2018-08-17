@@ -1,0 +1,54 @@
+{
+    "name": "MyWallet",
+    "version": "1.1",
+    "create_time": "2018-08-16 22:07:48",
+    "default_ont_id": "did:ont:AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+    "default_account_address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+    "scrypt": {
+        "n": 16384,
+        "r": 8,
+        "p": 8,
+        "dk_len": 64
+    },
+    "identities": [
+        {
+            "ont_id": "did:ont:AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+            "label": "ide",
+            "lock": false,
+            "controls": [
+                {
+                    "address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+                    "algorithm": "ECDSA",
+                    "enc_alg": "aes-256-gcm",
+                    "hash": "sha256",
+                    "id": "keys-1",
+                    "key": "e9mRWd4+OYhB/DG2pHHqzni0gmqMLuytKXqqgyi/IkLYAZp9F5FqQKOGNpoFcpEj",
+                    "parameters": {
+                        "curve": "P-256"
+                    },
+                    "salt": "OTBhYTFiNmRjZTMzMmQ3ZA==",
+                    "publicKey": "035384561673e76c7e3003e705e4aa7aee67714c8b68d62dd1fb3221f48c5d3da0"
+                }
+            ],
+            "isDefault": true
+        }
+    ],
+    "accounts": [
+        {
+            "address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+            "algorithm": "ECDSA",
+            "enc_alg": "aes-256-gcm",
+            "hash": "sha256",
+            "isDefault": true,
+            "key": "VGqhYFU49UBR1wPATUiVSzp+79H9z/PnO2xkwast3VKxSm/JtB8awFqwrm52Qvq1",
+            "label": "95df01b2",
+            "lock": false,
+            "parameters": {
+                "curve": "P-256"
+            },
+            "salt": "MWIyODRmNjcwMzBmMTNhZg==",
+            "publicKey": "035384561673e76c7e3003e705e4aa7aee67714c8b68d62dd1fb3221f48c5d3da0",
+            "signatureScheme": "SHA256withECDSA"
+        }
+    ]
+}

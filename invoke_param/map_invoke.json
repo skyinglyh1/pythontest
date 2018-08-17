@@ -1,0 +1,25 @@
+{
+  "rpc_address": "http://127.0.0.1:20336",
+  "acct_address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+  "acct_password": "111111",
+  "payer_address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+  "payer_password": "111111",
+  "wallet_file_path": "./test.json",
+  "gas_limit": 20000,
+  "gas_price": 0,
+  "abi_path": "./abi/mapabi.json",
+  "save_file": "./invoke.csv",
+  "function": {
+    "function1": {
+      "function_name": "TestMap",
+      "function_param": {},
+      "pre_exec": "true"
+    },
+    "function2": {
+      "function_name": "TestStruct",
+      "function_param": {
+      },
+      "pre_exec": "true"
+    }
+  }
+}
