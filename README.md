@@ -2,33 +2,87 @@
 
 ## Usage
 
-#### 部署合约到区块链
-python demo.py -m "./deploy.json"
+#### Deploy smart contract to blockchain
+<font color="green">python demo.py -m ./deploy.json</font>
 
-deploy.json配置文件如下：
+Configuration of deploy.json file：
 ```
 {
-  "rpc_address": "http://127.0.0.1:20336", // 节点IP
-  "code": "",                              //合约code字节码
-  "need_storage": "true",                  //是否需要存储
-  "name": "record",                        //合约名
-  "code_version": "1",                     //合约版本
-  "author": "sss",                         //合约作者
-  "email": "sss",                          //作者email
-  "desp": "record contract",               //合约描述信息
-  "payer_address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",//交易费用付款账户
-  "payer_password":"111111",             //账户密码
-  "wallet_file_path":"./test.json",      //钱包文件
-  "gas_limit": 20200000,
+  "rpc_address": "http://127.0.0.1:20336",      // Node IP
+  "code": "./contract/Token/Token.avm",         //Path of .avm code file
+  "need_storage": "true",                       //Need storage or not
+  "name": "OntTestToken",                       //Contract name
+  "code_version": "codeVersion1",               //Contract version
+  "author": "authorTest",                       //Contract author
+  "email": "emailTest",                         //Author email
+  "desp": "contractDescription",                //Contract Description
+  "payer_address": "AQf4Mzu1YJrhz9f3aRkkwSm9n3qhXGSh4p",    //Account to pay for deploying
+  "payer_password":"***",                    // account password
+  "wallet_file_path":"./deploy_wallet.json",    //Path of wallet file
+  "gas_limit": 20600000,
   "gas_price": 0,
-  "save_file":"./deploy.csv"             //测试结果保存的文件
+  "save_file":"./contract/Token/deploy.csv"     //Path of file for saving migrating test results
 }
 ```
 
 
-#### 调用合约中的方法
-python demo.py -i "./invoke_param/invoke.json"
+#### The way to invoke methods in contract
+Once your invoke.json file has been correctly configured, you can test the methods in your contract, whether one by one or once for all.
+###### Test the methods one by one
+To check the name of the contract:<br/>
+<font color="green">python demo.py -i ./contract/Token/invoke.json -f name</font>
+<br/> "demo.py" means the testing script for smart contract.
+<br/> "-i" means invoking the methods in smart contract.
+<br/> "./contract/Token/invoke.json" is the path of configuration file for the methods within your smart contract.
+<br/> "-f" means you're invoking the desginated function
+<br/> "name" means the name of function that you are invoking.
 
+To transfer some token: <br/>
+<font color="green">python demo.py -i ./contract/Token/invoke.json -f transfer</font>
+###### Test the methods once for all
+After you type the following command, all the methods/functions will be tested and run based on your configuration in "./contract/Token/invoke.json" file.<br/>
+<font color="green">python demo.py -i "./contract/Token/invoke.json"</font>
+
+
+
+Configuration of invoke.json file：
+```
+{
+  "rpc_address": "http://127.0.0.1:20336",      //Node IP
+  "payer_address": "AQf4Mzu1YJrhz9f3aRkkwSm9n3qhXGSh4p",       //Account to pay for invoking
+  "payer_password": "***",                      //account password
+  "wallet_file_path": "./invoke_wallet.json",   //Path of wallet file
+  "gas_limit": 20000,
+  "gas_price": 0,
+  "abi_path": "./contract/Token/TokenAbi.json", //Path of abi.json file
+  "save_file": "./contract/Token/invoke.csv",   //Path of file for saving invoking test results
+  "function": {
+    "name": {                                   //Function name
+      "function_name": "name",                  //Function name
+      "function_param": {                       //Function parameters
+      },
+      "pre_exec": true                          //Need to pre-execute or not
+    },
+    "transfer": {                                           
+      "function_name": "transfer",                         
+      "function_param": {
+        "fromAddr": "ASUwFccvYFrrWR6vsZhhNszLFNvCLA5qS6",   
+        "toAddr": "AQf4Mzu1YJrhz9f3aRkkwSm9n3qhXGSh4p",
+        "value": 1000000000000000
+      },
+      "signers":{                               //For the use fo signature
+        "m": 1,                                 //Single signature
+        "signer":{                              //Signature account
+          "walletpath": "invoke_wallet.json",   //Sig account wallet path
+          "address": "ASUwFccvYFrrWR6vsZhhNszLFNvCLA5qS6", // Sig account address
+          "password": "***"                     // Sig account password
+        }
+      },
+      "pre_exec": false                         //Need pre-execute or not
+    }
+  }
+}
+```
 
 
 ## Site
