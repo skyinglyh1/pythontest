@@ -33,8 +33,9 @@ class NeoVm(object):
             params.append(i)
         tx = Transaction(0, 0xd1, unix_time_now, gas_price, gas_limit, payer_acct.get_address().to_array(),
                          params, bytearray(), [], bytearray())
-        self.__sdk.sign_transaction(tx, acct)
-        if payer_acct is not None and acct.get_address_base58() != payer_acct.get_address_base58():
+        if acct is not None:
+            self.__sdk.sign_transaction(tx, acct)
+        if payer_acct is not None and acct is not None and acct.get_address_base58() != payer_acct.get_address_base58():
             self.__sdk.add_sign_transaction(tx, payer_acct)
         return self.__sdk.rpc.send_raw_transaction(tx)
 
