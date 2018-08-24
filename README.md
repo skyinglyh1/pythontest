@@ -3,7 +3,11 @@
 ## Usage
 
 #### Deploy smart contract to blockchain
-<font color="green">python demo.py -m ./deploy.json</font>
+
+```
+python demo.py -m ./deploy.json
+```
+
 
 Configuration of deploy.json file：
 ```
@@ -28,20 +32,37 @@ Configuration of deploy.json file：
 
 #### The way to invoke methods in contract
 Once your invoke.json file has been correctly configured, you can test the methods in your contract, whether one by one or once for all.
+
 ###### Test the methods one by one
 To check the name of the contract:<br/>
-<font color="green">python demo.py -i ./contract/Token/invoke.json -f name</font>
+
+```
+python demo.py -i ./contract/Token/invoke.json -f name
+or
+python demo.py -i ./contract/Token/invoke.json -f name1,name2
+```
+
 <br/> "demo.py" means the testing script for smart contract.
 <br/> "-i" means invoking the methods in smart contract.
 <br/> "./contract/Token/invoke.json" is the path of configuration file for the methods within your smart contract.
 <br/> "-f" means you're invoking the desginated function
 <br/> "name" means the name of function that you are invoking.
 
+example:
+
 To transfer some token: <br/>
-<font color="green">python demo.py -i ./contract/Token/invoke.json -f transfer</font>
+
+```
+python demo.py -i ./contract/Token/invoke.json -f transfer
+```
+
 ###### Test the methods once for all
 After you type the following command, all the methods/functions will be tested and run based on your configuration in "./contract/Token/invoke.json" file.<br/>
-<font color="green">python demo.py -i "./contract/Token/invoke.json"</font>
+
+```
+python demo.py -i "./contract/Token/invoke.json"
+```
+
 
 
 
