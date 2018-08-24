@@ -8,6 +8,11 @@
 python demo.py -m ./deploy.json
 ```
 
+`demo.py` means the testing script for smart contract.
+`-m` means deploy contract to blockchain.
+`./deploy.json` deploy configure file.
+
+
 
 Configuration of deploy.json file：
 ```
@@ -42,11 +47,12 @@ or
 python demo.py -i ./contract/Token/invoke.json -f name1,name2
 ```
 
-<br/> "demo.py" means the testing script for smart contract.
-<br/> "-i" means invoking the methods in smart contract.
-<br/> "./contract/Token/invoke.json" is the path of configuration file for the methods within your smart contract.
-<br/> "-f" means you're invoking the desginated function
-<br/> "name" means the name of function that you are invoking.
+`demo.py` means the testing script for smart contract.
+`-i` means invoking the methods in smart contract.
+`./contract/Token/invoke.json` is the path of configuration file for the methods within your smart contract.
+`-f` means you're invoking the desginated function
+`name` means the name of function that you are invoking.
+
 
 example:
 
@@ -54,6 +60,8 @@ To transfer some token: <br/>
 
 ```
 python demo.py -i ./contract/Token/invoke.json -f transfer
+or
+python demo.py -i ./contract/Token/invoke.json -f transfer,balanceOf
 ```
 
 ###### Test the methods once for all
