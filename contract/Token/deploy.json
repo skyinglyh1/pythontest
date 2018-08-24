@@ -1,0 +1,16 @@
+{
+  "rpc_address": "http://127.0.0.1:20336",
+  "code": "./contract/Token/Token.avm",
+  "need_storage": "true",
+  "name": "record",
+  "code_version": "1",
+  "author": "sss",
+  "email": "sss",
+  "desp": "record contract",
+  "payer_address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+  "payer_password":"111111",
+  "wallet_file_path":"./test.json",
+  "gas_limit": 20400000,
+  "gas_price": 0,
+  "save_file":"./contract/Token/deploy.csv"
+}

@@ -274,8 +274,8 @@ def save_file(m: [], res: str, func_l = None):
             writer = csv.writer(csvfile)
             if not ishasheader:
                 writer.writerow(
-                    ["No","need_storage", "name", "code_version", "author", "email", "desp", "payer_address", "gas_limit",
-                     "gas_price"])
+                    ["No", "need_storage", "name", "code_version", "author", "email", "desp", "payer_address", "gas_limit",
+                     "gas_price", "result"])
             writer.writerow([m["No"]+no, m["need_storage"], m["name"], m["code_version"], m["author"], m["email"], m["desp"],
                              m["payer_address"], m["gas_limit"], m["gas_price"], res])
     elif m["func"] == "invoke":
