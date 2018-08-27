@@ -2,11 +2,14 @@ import csv
 import json
 import os
 import sys, getopt
-import time
+from time import time
+import time as time2
 from collections import namedtuple
 from ontology.common.address import Address
+from ontology.core.transaction import Transaction
 from ontology.ont_sdk import OntologySdk
 from ontology.smart_contract.neo_contract.abi.abi_info import AbiInfo
+from ontology.smart_contract.neo_contract.abi.build_params import BuildParams
 from ontology.wallet.wallet_manager import WalletManager
 
 
@@ -97,163 +100,235 @@ def execute(m:[], function_name=None):
     sdk = OntologySdk()
     sdk.set_rpc(m["rpc_address"])
     if m["func"] is "migrate":
-        # 判断是否已经部署
-        code = sdk.rpc.get_smart_contract(m["contract_address"])
-        if code != "unknow contract":
-            print("contract have been deployed")
-            print("contract_address:", m["contract_address"])
-            return
-        need_storage = False
-        if m["need_storage"] is 'true':
-            need_storage = True
-        tx = sdk.neo_vm().make_deploy_transaction(m["code"], need_storage, m["name"], m["code_version"], m["author"]
-                                                  , m["email"], m["desp"], m["payer_address"], m["gas_limit"],
-                                                  m["gas_price"])
-        sdk.wallet_manager.open_wallet(m["wallet_file_path"])
-        acct = sdk.wallet_manager.get_account(m["payer_address"], m["payer_password"])
-        sdk.sign_transaction(tx, acct)
-        sdk.set_rpc(m["rpc_address"])
-        try:
-            print("deploying，please waiting ...")
-            res = sdk.rpc.send_raw_transaction(tx)
-            print("txhash:", res)
-            for i in range(10):
-                time.sleep(1)
-                res = sdk.rpc.get_smart_contract(m["contract_address"])
-                if res == "unknow contract" or res == "":
-                    continue
-                else:
-                    print("deploy success")
-                    save_file(m, "success")
-                    return
-            print("deployed failed")
-            save_file(m, "deployed failed")
-        except Exception as e:
-            print(e)
-            save_file(m, e)
-
+        deploy(sdk, m)
     elif m["func"] is "invoke":
-        func_maps = {}
-        for i in list(m["function"]):
-            func_map = {}
-            param_list = []
-            func_map["function_name"] = i.function_name
-            func_map["pre_exec"] = i.pre_exec
-            try:
-                for j in list(i.function_param):
-                    param_list.append(j)
-                func_map["param_list"] = param_list
-            except Exception as e:
-                pass
-            if not i.pre_exec:
-                try:
-                    func_map["signers"] = i.signers
-                except AttributeError as e:
-                    func_map["signers"] = None
-            func_maps[i.function_name] = func_map
-        with open(str(m["abi_path"]), "r") as f:
-            abi = json.loads(f.read(), object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
-            abi_info = AbiInfo(abi.hash, abi.entrypoint, abi.functions, abi.events)
-            contract_address = bytearray.fromhex(str(abi.hash)[2:])
-            m["contract_address"] = contract_address.hex()
-            contract_address.reverse()
-            sdk.wallet_manager.open_wallet(m["wallet_file_path"])
-            payer = sdk.wallet_manager.get_account(m["payer_address"], m["payer_password"])
-            func_l = []
-            no = 0
-            for func_map in func_maps.values():
-                if function_name is not None:
-                    if func_map["function_name"] not in function_name:
-                        continue
-                func = abi_info.get_function(func_map["function_name"])
-                func_map["return_type"] = func.return_type
-                params = []
-                l = []
-                l.append(no)
-                no = no + 1
-                l.append(func_map["function_name"])
-                l.append(func_map["pre_exec"])
-                temp_l = ""  # 用来放参数
-                for i in range(len(func_map["param_list"])):
-                    if type(func_map["param_list"][i]) is int:
-                        temp_l += str(func_map["param_list"][i]) + ":"
-                    else:
-                        temp_l += func_map["param_list"][i] + ":"
-                    if func.parameters[i].type == "String":
-                        params.append(str(func_map["param_list"][i]))
-                    if func.parameters[i].type == "ByteArray":
-                        if func_map["param_list"][i].startswith("A"):
-                            params.append(Address.b58decode(func_map["param_list"][i], False).to_array())
-                        else:
-                            params.append(bytearray(func_map["param_list"][i].encode()))
-                    if func.parameters[i].type == "Integer":
-                        params.append(func_map["param_list"][i])
-                l.append(temp_l[:len(temp_l) - 1])
-                if len(params) == 1:
-                    func.set_params_value(params[0])
-                elif len(params) == 2:
-                    func.set_params_value(params[0], params[1])
-                elif len(params) == 3:
-                    func.set_params_value(params[0], params[1], params[2])
-                elif len(params) == 4:
-                    func.set_params_value(params[0], params[1], params[2], params[3])
-                elif len(params) == 5:
-                    func.set_params_value(params[0], params[1], params[2], params[3], params[4])
-                elif len(params) == 6:
-                    func.set_params_value(params[0], params[1], params[2], params[3], params[4], params[5])
-                elif len(params) == 7:
-                    func.set_params_value(params[0], params[1], params[2], params[3], params[4], params[5], params[6])
-
-                try:
-                    print("")
-                    print("invoking, please waiting ...")
-                    print("method: " + func_map["function_name"])
-                    if func_map["pre_exec"]:
-                        res = sdk.neo_vm().send_transaction(contract_address, None, None, 0,
-                                                            0, func, True)
-                        if res["error"] != 0:
-                            print(res["desc"])
-                            l.append(res["desc"])
-                        else:
-                            if res["result"]["Result"] == None or res["result"]["Result"] == "":
-                                print("res:", res["result"]["Result"])
-                                l.append("")
-                            else:
-                                if func_map["return_type"] == "Integer":
-                                    value = bytearray.fromhex(res["result"]["Result"])
-                                    value.reverse()
-                                    print("res:", int(value.hex(), 16))
-                                    l.append(int(value.hex(), 16))
-                                else:
-                                    print("res:", (bytearray.fromhex(res["result"]["Result"])).decode('utf-8'))
-                                    l.append((bytearray.fromhex(res["result"]["Result"])).decode('utf-8'))
-                    else:
-                        res = ""
-                        if func_map["signers"] != None:
-                            wm = WalletManager()
-                            wm.open_wallet(func_map["signers"].signer.walletpath)
-                            signer = wm.get_account(func_map["signers"].signer.address,
-                                                                    func_map["signers"].signer.password)
-                            res = sdk.neo_vm().send_transaction(contract_address, signer, payer, m["gas_limit"],
-                                                                m["gas_price"], func, False)
-                        else:
-                            res = sdk.neo_vm().send_transaction(contract_address, payer, payer, m["gas_limit"],
-                                                                m["gas_price"], func, False)
-                        for i in range(10):
-                            time.sleep(1)
-                            event = sdk.rpc.get_smart_contract_event_by_tx_hash(res)
-                            if event != None:
-                                print("txhash:", res)
-                                print("event:", event)
-                                break
-                        l.append(res)
-                except Exception as e:
-                    print("Error:", e)
-                    l.append(e)
-                func_l.append(l)
-            save_file(m, "", func_l)
+        invoke(sdk, m, function_name)
     else:
         print("only support migrate and invoke")
+
+
+def invoke(sdk, m, function_name=None):
+    func_maps = {}
+    for i in list(m["function"]):
+        if function_name is not None:
+            if i.function_name not in function_name:
+                continue
+        func_map = {}
+        param_list = []
+        func_map["function_name"] = i.function_name
+        func_map["pre_exec"] = i.pre_exec
+        try:
+            for j in list(i.function_param):
+                param_list.append(j)
+            func_map["param_list"] = param_list
+        except Exception as e:
+            pass
+        if not i.pre_exec:
+            try:
+                func_map["signers"] = i.signers
+            except AttributeError as e:
+                func_map["signers"] = None
+        func_maps[i.function_name] = func_map
+    with open(str(m["abi_path"]), "r") as f:
+        abi = json.loads(f.read(), object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+        abi_info = AbiInfo(abi.hash, abi.entrypoint, abi.functions, abi.events)
+        contract_address = bytearray.fromhex(str(abi.hash)[2:])
+        m["contract_address"] = contract_address.hex()
+        contract_address.reverse()
+        sdk.wallet_manager.open_wallet(m["wallet_file_path"])
+        payer = sdk.wallet_manager.get_account(m["payer_address"], m["payer_password"])
+        func_l = []
+        no = 0
+        for func_map in func_maps.values():
+            if function_name is not None:
+                if func_map["function_name"] not in function_name:
+                    continue
+            func = abi_info.get_function(func_map["function_name"])
+            func_map["return_type"] = func.return_type
+            l = []
+            l.append(no)
+            no = no + 1
+            l.append(func_map["function_name"])
+            l.append(func_map["pre_exec"])
+            # 用来放参数
+            temp_l, params = convert_params(func, func_map)
+            l.append(temp_l[:len(temp_l) - 1])
+            if len(func_map["param_list"]) !=0 and type(func_map["param_list"][0]) is str or type(func_map["param_list"][0]) is int:
+                init_func(func, params)
+            try:
+                print("")
+                print("invoking, please waiting ...")
+                print("method: " + func_map["function_name"])
+                if func_map["pre_exec"]:
+                    res = sdk.neo_vm().send_transaction(contract_address, None, None, 0,
+                                                        0, func, True)
+                    if res["error"] != 0:
+                        print(res["desc"])
+                        l.append(res["desc"])
+                    else:
+                        if res["result"]["Result"] is None or res["result"]["Result"] == "":
+                            print("res:", res["result"]["Result"])
+                            l.append("")
+                        else:
+                            if func_map["return_type"] == "Integer":
+                                value = bytearray.fromhex(res["result"]["Result"])
+                                value.reverse()
+                                print("res:", int(value.hex(), 16))
+                                l.append(int(value.hex(), 16))
+                            else:
+                                print("res:", (bytearray.fromhex(res["result"]["Result"])).decode('utf-8'))
+                                l.append((bytearray.fromhex(res["result"]["Result"])).decode('utf-8'))
+                else:
+                    res = ""
+                    if func_map["signers"] is not None:
+                        # 单独处理  参数是array的情况
+                        if type(func_map["param_list"]) is list and type(func_map["param_list"][0]) is not str and type(func_map["param_list"][0]) is not int:
+                            res = handle_array_tx(contract_address,func_map, payer, m, sdk)
+                        else:
+                            wm = WalletManager()
+                            wm.open_wallet(func_map["signers"].signer.walletpath)
+                            if func_map["signers"].m == 1:
+                                signer = wm.get_account(func_map["signers"].signer.address,
+                                                        func_map["signers"].signer.password)
+                                res = sdk.neo_vm().send_transaction(contract_address, signer, payer, m["gas_limit"],
+                                                                    m["gas_price"], func, False)
+                    else:
+                        res = sdk.neo_vm().send_transaction(contract_address, payer, payer, m["gas_limit"],
+                                                            m["gas_price"], func, False)
+                    for i in range(10):
+                        time2.sleep(1)
+                        event = sdk.rpc.get_smart_contract_event_by_tx_hash(res)
+                        if event is not None:
+                            print("txhash:", res)
+                            print("event:", event)
+                            break
+                    l.append(res)
+            except Exception as e:
+                print("Error:", e)
+                l.append(e)
+            func_l.append(l)
+        save_file(m, "", func_l)
+
+
+def deploy(sdk, m):
+    # 判断是否已经部署
+    code = sdk.rpc.get_smart_contract(m["contract_address"])
+    if code != "unknow contract":
+        print("contract have been deployed")
+        print("contract_address:", m["contract_address"])
+        return
+    need_storage = False
+    if m["need_storage"] is 'true':
+        need_storage = True
+    tx = sdk.neo_vm().make_deploy_transaction(m["code"], need_storage, m["name"], m["code_version"], m["author"]
+                                              , m["email"], m["desp"], m["payer_address"], m["gas_limit"],
+                                              m["gas_price"])
+    sdk.wallet_manager.open_wallet(m["wallet_file_path"])
+    acct = sdk.wallet_manager.get_account(m["payer_address"], m["payer_password"])
+    sdk.sign_transaction(tx, acct)
+    sdk.set_rpc(m["rpc_address"])
+    try:
+        print("deploying，please waiting ...")
+        res = sdk.rpc.send_raw_transaction(tx)
+        print("txhash:", res)
+        for i in range(10):
+            time2.sleep(1)
+            res = sdk.rpc.get_smart_contract(m["contract_address"])
+            if res == "unknow contract" or res == "":
+                continue
+            else:
+                print("deploy success")
+                save_file(m, "success")
+                return
+        print("deployed failed")
+        save_file(m, "deployed failed")
+    except Exception as e:
+        print(e)
+        save_file(m, e)
+
+
+def handle_array_tx(contract_address, func_map, payer, m, sdk):
+    param_list = []
+    param_array_list = []
+    for l2 in func_map["param_list"]:
+        param_array_list2 = []
+        param_array_list2.append(Address.b58decode(l2.fromAddr.encode("utf-8"), False).to_array())
+        param_array_list2.append(Address.b58decode(l2.toAddr.encode("utf-8"), False).to_array())
+        param_array_list2.append(l2.value)
+        param_array_list.append(param_array_list2)
+    param_list.append(bytes(func_map["function_name"].encode()))
+    param_list.append(param_array_list)
+    params = BuildParams.create_code_params_script(param_list)
+    unix_time_now = int(time())
+    params.append(0x67)
+    for i in contract_address:
+        params.append(i)
+    tx = Transaction(0, 0xd1, unix_time_now, m["gas_price"], m["gas_limit"],
+                     payer.get_address().to_array(),
+                     params, bytearray(), [], bytearray())
+    sdk.add_sign_transaction(tx, payer)
+    path_addr = []
+    for signer in list(func_map["signers"]):
+        if signer.m == 1:
+            if signer.signer.walletpath not in path_addr:
+                path_addr.append(signer.signer.walletpath)
+                sdk.wallet_manager.open_wallet(signer.signer.walletpath)
+            acc = sdk.wallet_manager.get_account(signer.signer.address, signer.signer.password)
+            if acc is not None:
+                sdk.add_sign_transaction(tx, acc)
+        else:
+            print("not support")
+            # TODO
+    res = sdk.rpc.send_raw_transaction(tx)
+    return res
+
+
+def init_func(func, params: []):
+    if len(params) == 1:
+        func.set_params_value(params[0])
+    elif len(params) == 2:
+        func.set_params_value(params[0], params[1])
+    elif len(params) == 3:
+        func.set_params_value(params[0], params[1], params[2])
+    elif len(params) == 4:
+        func.set_params_value(params[0], params[1], params[2], params[3])
+    elif len(params) == 5:
+        func.set_params_value(params[0], params[1], params[2], params[3], params[4])
+    elif len(params) == 6:
+        func.set_params_value(params[0], params[1], params[2], params[3], params[4], params[5])
+    elif len(params) == 7:
+        func.set_params_value(params[0], params[1], params[2], params[3], params[4], params[5], params[6])
+
+
+def convert_params(func, func_map: {}):
+    params = []
+    temp_l = ""
+    for i in range(len(func_map["param_list"])):
+        if func.parameters[i].type == "String":
+            params.append(str(func_map["param_list"][i]))
+            temp_l += str(func_map["param_list"][i]) + ":"
+        elif func.parameters[i].type == "ByteArray":
+            temp_l += str(func_map["param_list"][i]) + ":"
+            if func_map["param_list"][i].startswith("A"):
+                params.append(Address.b58decode(func_map["param_list"][i], False).to_array())
+            else:
+                params.append(bytearray(func_map["param_list"][i].encode()))
+        elif func.parameters[i].type == "Integer":
+            params.append(func_map["param_list"][i])
+            temp_l += str(func_map["param_list"][i]) + ":"
+        elif func.parameters[i].type == "Array":
+            params.append(list(func_map["param_list"][i]))
+            for param_temp in list(func_map["param_list"][i]):
+                l = []
+                if type(param_temp) is str:
+                    l.append(Address.b58decode(param_temp, False).to_array())
+                    temp_l += param_temp + ":"
+                elif type(param_temp) is int:
+                    l.append(param_temp)
+                    temp_l += str(param_temp) + ":"
+                params.append(l)
+            break
+    return temp_l, params
 
 
 def save_file(m: [], res: str, func_l = None):
