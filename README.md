@@ -1,4 +1,9 @@
-<h1 align="center">Python Test</h1>
+<h1 align="center">Ontology SmartContract Test</h1>
+
+## Instruction
+
+Ontology SmartContract Test Framework 
+
 
 ## Usage
 
