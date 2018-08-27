@@ -185,7 +185,7 @@ def invoke(sdk, m, function_name=None):
                     if func_map["signers"] is not None:
                         # 单独处理  参数是array的情况
                         if type(func_map["param_list"]) is list and type(func_map["param_list"][0]) is not str and type(func_map["param_list"][0]) is not int:
-                            res = handle_array_tx(contract_address,func_map, payer, m, sdk)
+                            res = handle_array_tx(contract_address, func_map, payer, m, sdk)
                         else:
                             wm = WalletManager()
                             wm.open_wallet(func_map["signers"].signer.walletpath)
@@ -254,9 +254,14 @@ def handle_array_tx(contract_address, func_map, payer, m, sdk):
     param_array_list = []
     for l2 in func_map["param_list"]:
         param_array_list2 = []
-        param_array_list2.append(Address.b58decode(l2.fromAddr.encode("utf-8"), False).to_array())
-        param_array_list2.append(Address.b58decode(l2.toAddr.encode("utf-8"), False).to_array())
-        param_array_list2.append(l2.value)
+        for l22 in list(l2):
+            if type(l22) is str:
+                if str(l22).startswith("A"):
+                    param_array_list2.append(Address.b58decode(l22.encode("utf-8"), False).to_array())
+                else:
+                    param_array_list2.append(l22.encode())
+            elif type(l22) is int:
+                param_array_list2.append(l22)
         param_array_list.append(param_array_list2)
     param_list.append(bytes(func_map["function_name"].encode()))
     param_list.append(param_array_list)
