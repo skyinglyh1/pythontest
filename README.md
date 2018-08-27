@@ -2,10 +2,22 @@
 
 ## Instruction
 
-Ontology SmartContract Test Framework 
+Ontology SmartContract Test Framework. It is used to test the methods within your Ontology smart contract in either testnet or testmode. 
 
 
 ## Usage
+#### Preparation
+1. Build development environment, for more info, please go to https://github.com/ontio/ontology/blob/master/README_CN.md
+1.1 After the environemnt is built, then create your own wallet by referring to "./ontology account add --default". In your path of "...src\github.com\ontio\ontology", you will see wallet.dat file, open the file, you can see the accounts in your wallet.
+1.2 To deploy contract, you have to have ONG in your account. 
+To view unlocked ONG balance, refer to "./ontology asset unboundong <address|index|label>"
+To extract unlocked ONG, refer to "./ontology asset withdrawong <address|index|label>"
+2. Start ontology in testmode, for more info, please go to https://github.com/ontio/ontology/blob/master/docs/specifications/cli_user_guide_CN.md
+3. Download Python Test Framework.
+3.1 Then please read README.md carefully in order to test your contract. 
+3.2 Before you do the test, make sure you understand path in the file of ./contract/Token/invoke.json and other configuration in this file.
+3.3 Make sure ./contract/Token/Token.avm is your .avm code and TokenAbi.json is your contract abi json content.
+
 
 #### Deploy smart contract to blockchain
 
