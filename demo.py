@@ -153,8 +153,10 @@ def invoke(sdk, m, function_name=None):
             # 用来放参数
             temp_l, params = convert_params(func, func_map)
             l.append(temp_l[:len(temp_l) - 1])
-            if len(func_map["param_list"]) !=0 and type(func_map["param_list"][0]) is str or type(func_map["param_list"][0]) is int:
-                init_func(func, params)
+            print(len(func_map["param_list"]))
+            if len(func_map["param_list"]) !=0:
+                if type(func_map["param_list"][0]) is str or type(func_map["param_list"][0]) is int:
+                    init_func(func, params)
             try:
                 print("")
                 print("invoking, please waiting ...")
