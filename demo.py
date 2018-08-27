@@ -320,16 +320,18 @@ def convert_params(func, func_map: {}):
             temp_l += str(func_map["param_list"][i]) + ":"
         elif func.parameters[i].type == "Array":
             params.append(list(func_map["param_list"][i]))
-            for param_temp in list(func_map["param_list"][i]):
-                l = []
-                if type(param_temp) is str:
-                    l.append(Address.b58decode(param_temp, False).to_array())
-                    temp_l += param_temp + ":"
-                elif type(param_temp) is int:
-                    l.append(param_temp)
-                    temp_l += str(param_temp) + ":"
-                params.append(l)
-            break
+            for func in func_map["param_list"]:
+                for param_temp in list(func):
+                    print(param_temp)
+                    l = []
+                    if type(param_temp) is str:
+                        l.append(Address.b58decode(param_temp, False).to_array())
+                        temp_l += param_temp + ":"
+                    elif type(param_temp) is int:
+                        l.append(param_temp)
+                        temp_l += str(param_temp) + ":"
+                    params.append(l)
+        break
     return temp_l, params
 
 
