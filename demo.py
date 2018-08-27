@@ -155,7 +155,7 @@ def invoke(sdk, m, function_name=None):
             l.append(temp_l[:len(temp_l) - 1])
             print(len(func_map["param_list"]))
             if len(func_map["param_list"]) !=0:
-                if type(func_map["param_list"][0]) is str or type(func_map["param_list"][0]) is int:
+                if type(func_map["param_list"][0]) is str or type(func_map["param_list"][0]) is int or type(func_map["param_list"][0]) is bool:
                     init_func(func, params)
             try:
                 print("")
@@ -184,7 +184,8 @@ def invoke(sdk, m, function_name=None):
                     res = ""
                     if func_map["signers"] is not None:
                         # 单独处理  参数是array的情况
-                        if type(func_map["param_list"]) is list and type(func_map["param_list"][0]) is not str and type(func_map["param_list"][0]) is not int:
+                        if type(func_map["param_list"]) is list and type(func_map["param_list"][0]) is not str and type(func_map["param_list"][0]) is not int\
+                                and type(func_map["param_list"][0]) is not bool:
                             res = handle_array_tx(contract_address, func_map, payer, m, sdk)
                         else:
                             wm = WalletManager()
