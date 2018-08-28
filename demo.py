@@ -11,18 +11,20 @@ from ontology.ont_sdk import OntologySdk
 from ontology.smart_contract.neo_contract.abi.abi_info import AbiInfo
 from ontology.smart_contract.neo_contract.abi.build_params import BuildParams
 from ontology.wallet.wallet_manager import WalletManager
+import requests
+import re
 
 
 def main(argv):
    try:
-      opts, args = getopt.getopt(argv, "hm:i:f:", ["migrate=", "invoke=", "function"])
+      opts, args = getopt.getopt(argv, "hm:i:c:f:", ["migrate=", "invoke=", "compile", "function"])
    except getopt.GetoptError:
-      print('test.py [-m|--migrate] [-i|--invoke] ')
+      print('demo.py [-m|--migrate] [-i|--invoke] [-c|--compile]')
       sys.exit(2)
    m = {}
    for opt, arg in opts:
       if opt == '-h':
-         print('test.py [-m|--migrate] [-i|--invoke invoke.json -f function] ')
+         print('test.py [-m|--migrate] [-i|--invoke invoke.json -f function] [] ')
          sys.exit()
       elif opt in ("-m", "--migrate"):
           m["func"] = "migrate"
@@ -30,6 +32,9 @@ def main(argv):
       elif opt in ("-i", "--invoke"):
          m["func"] = "invoke"
          invoke_cmd(m, str(arg))
+      elif opt in ("-c", "--compile"):
+          compile_cmd(m, str(arg))
+          return
       elif opt in ("-f", "--function"):
           funcs = str(arg).split(",")
           funcs2 = funcs.copy()
@@ -42,6 +47,47 @@ def main(argv):
               print("there is not the function:", funcs2)
           sys.exit()
    execute(m)
+
+
+def compile_cmd(m: [], arg: str):
+    url = ""
+    payload = {"type": "", "code": ""}
+    if arg == "":
+        print("there is not contract")
+        return
+    elif "cs" in arg:
+        payload["type"] = "CSharp"
+        url = "http://42.159.94.234:8080/api/v1.0/compile"
+        with open(arg, "r") as f:
+            contract = f.read()
+            if str == "":
+                print("contract is null")
+            payload["code"] = contract
+    elif "py" in arg:
+        payload["type"] = "Python"
+        url = "http://42.159.92.140:8080/api/v1.0/compile"
+    header = {'Content-type': 'application/json'}
+    timeout = 10
+    path = os.path.dirname(arg)
+    file_name = os.path.basename(arg).split(".")
+    print("compiling, please wait a monment...")
+    res = requests.post(url, json=payload, headers=header, timeout=timeout)
+    result = json.loads(res.content.decode())
+    if result["errcode"] == 0:
+        with open(path+"/"+file_name[0]+".avm", "w", encoding='utf-8') as f:
+            avm = result["avm"].lstrip('b\'')
+            temp = avm.rstrip('\'')
+            f.write(temp)
+        with open(path+"/"+file_name[0]+"_abi.json", "w", encoding='utf-8') as f2:
+            r = re.sub('\\\\n', '', str(result["abi"]))
+            abi = str(r.lstrip('b\''))
+            temp = abi.rstrip('\'')
+            f2.write(temp.replace(' ', ''))
+        print("compiled, Thank you")
+    else:
+        print("compile failed")
+        print(result)
+
 
 
 def deploy_cmd(m: [], arg: str):
@@ -153,7 +199,6 @@ def invoke(sdk, m, function_name=None):
             # 用来放参数
             temp_l, params = convert_params(func, func_map)
             l.append(temp_l[:len(temp_l) - 1])
-            print(len(func_map["param_list"]))
             if len(func_map["param_list"]) !=0:
                 if type(func_map["param_list"][0]) is str or type(func_map["param_list"][0]) is int or type(func_map["param_list"][0]) is bool:
                     init_func(func, params)
@@ -343,7 +388,6 @@ def convert_params(func, func_map: {}):
 def save_file(m: [], res: str, func_l = None):
     ishasheader = False
     no = 0
-    print(m["save_file"])
     if os.path.exists(m["save_file"]):
         with open(m["save_file"], "r") as f:
             lines = list(csv.reader(f))
