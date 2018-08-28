@@ -328,7 +328,6 @@ def convert_params(func, func_map: {}):
             params.append(list(func_map["param_list"][i]))
             for func in func_map["param_list"]:
                 for param_temp in list(func):
-                    print(param_temp)
                     l = []
                     if type(param_temp) is str:
                         l.append(Address.b58decode(param_temp, False).to_array())

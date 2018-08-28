@@ -1,0 +1,97 @@
+{
+  "rpc_address": "http://127.0.0.1:20336",
+  "payer_address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+  "payer_password": "111111",
+  "wallet_file_path": "./test.json",
+  "gas_limit": 20000,
+  "gas_price": 0,
+  "abi_path": "./contract/swap/swapabi.json",
+  "save_file": "./contract/swap/invoke.csv",
+  "function": {
+    "SetFeeRate": {
+      "function_name": "SetFeeRate",
+      "function_param": {
+        "percentage": 10
+      },
+      "pre_exec": false
+    },
+    "GetFeeRate": {
+      "function_name": "GetFeeRate",
+      "function_param": {
+      },
+      "pre_exec": true
+    },
+    "symbol": {
+      "function_name": "symbol",
+      "function_param": {
+      },
+      "pre_exec": true
+    },
+    "decimals": {
+      "function_name": "decimals",
+      "function_param": {
+      },
+      "pre_exec": true
+    },
+    "totalSupply": {
+      "function_name": "totalSupply",
+      "function_param": {
+      },
+      "pre_exec": true
+    },
+    "transfer": {
+      "function_name": "transfer",
+      "function_param": {
+        "fromAddr": "AHX1wzvdw9Yipk7E9MuLY4GGX4Ym9tHeDe",
+        "toAddr": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+        "value": 1
+      },
+      "signers":{
+        "m": 1,
+        "signer":{
+          "walletpath": "wallet.json",
+          "address": "AHX1wzvdw9Yipk7E9MuLY4GGX4Ym9tHeDe",
+          "password": "111111"
+        }
+      },
+      "pre_exec": false
+    },
+    "balanceOf": {
+      "function_name": "balanceOf",
+      "function_param": {
+        "address": "ARR5ywDEx3ybXkMGmZPFYu9hiC8J4xvNdc"
+      },
+      "pre_exec": true
+    },
+    "inflation": {
+      "function_name": "inflation",
+      "function_param": {
+        "param1": 1
+      },
+      "signers":{
+        "m": 1,
+        "signer":{
+          "walletpath": "./test.json",
+          "address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+          "password": "111111"
+        }
+      },
+      "pre_exec": false
+    },
+    "recycle": {
+      "function_name": "recycle",
+      "function_param": {
+        "param1": 1
+      },
+      "signers":{
+        "m": 1,
+        "signer":{
+          "walletpath": "./test.json",
+          "address": "AazEvfQPcQ2GEFFPLF1ZLwQ7K5jDn81hve",
+          "password": "111111"
+        }
+      },
+      "pre_exec": false
+    }
+  }
+}
