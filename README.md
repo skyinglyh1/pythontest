@@ -1,8 +1,7 @@
 <h1 align="center">Ontology SmartContract Test</h1>
 
 ## Instruction
-
-Ontology SmartContract Test Framework，该框架支持编译、部署和调用合约的功能。合约中的方法可以一个一个测试，也可以一次测试多个方法，具体用法，请参考下面的介绍。
+This is Ontology Smart Contract Testing Framework, supporting compiling contract, deploying contract and invoking methods within smart contract. You can invoke and test the methods either one by one or once for all. For the details, please refer to the content below.
 
 
 ## Usage
@@ -13,7 +12,8 @@ Ontology SmartContract Test Framework，该框架支持编译、部署和调用�
 python demo.py -c ./contract/swap/swap.cs
 ```
 
-编译合约生成abi和avm文件，abi文件用来调用合约的方法，avm文件用来部署合约到区块链
+Compile the contract to produce .abi and .avm files, where .abi file describes the methods interface and .avm file can be used to deploy the contract to the blockchain LocalNet, TestNet or MainNet.
+
 
 #### Deploy smart contract to blockchain
 
